@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bản Đồ Tư Duy Tương Tác - Bộ Luật Lao Động 2026</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    @keyframes pulse-subtle {
+      0%, 100% { opacity: 0.8; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.03); }
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-4px); }
+    }
+    .grid-dots {
+      background-color: #0b0f19;
+      background-image: radial-gradient(rgba(148, 163, 184, 0.15) 1.2px, transparent 1.2px);
+      background-size: 24px 24px;
+    }
+    .glass-card {
+      background: rgba(17, 24, 39, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    }
+    .glass-card-hover {
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .glass-card-hover:hover {
+      transform: translateY(-2px);
+      border-color: rgba(56, 189, 248, 0.4);
+      box-shadow: 0 16px 36px -10px rgba(56, 189, 248, 0.15);
+    }
+    .glow-cyan {
+      box-shadow: 0 0 35px -5px rgba(6, 182, 212, 0.35);
+    }
+    .glow-emerald {
+      box-shadow: 0 0 35px -5px rgba(16, 185, 129, 0.35);
+    }
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.25); border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.5); }
+  </style>
+</head>
+<body class="grid-dots text-slate-100 antialiased min-h-screen flex flex-col font-sans selection:bg-cyan-500/30 selection:text-cyan-200 overflow-hidden">
+
+  <!-- TOP APP BAR -->
+  <header class="h-16 border-b border-slate-800/80 glass-card px-4 md:px-6 flex items-center justify-between z-30 shrink-0">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-emerald-400 p-[1px] flex items-center justify-center shadow-lg shadow-cyan-500/20">
+        <div class="w-full h-full bg-slate-900 rounded-[11px] flex items-center justify-center text-lg">
+          ⚖️
+        </div>
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="text-sm md:text-base font-bold tracking-tight text-white flex items-center gap-1.5">
+            Bộ Luật Lao Động Việt Nam
+            <span class="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/25">
+              ● 2026 Realtime
+            </span>
+          </h1>
+        </div>
+        <p class="text-[11px] text-slate-400 hidden sm:block">
+          BLLĐ 2019 • VBHN 125/VBHN-VPQH • Nghị định 293/2025/NĐ-CP • Luật BHXH 2024
+        </p>
+      </div>
+    </div>
+
+    <!-- VIEW SWITCHER & SEARCH -->
+    <div class="flex items-center gap-2 md:gap-3">
+      <!-- Search Input -->
+      <div class="relative w-44 sm:w-64">
+        <input 
+          type="text" 
+          id="globalSearch" 
+          placeholder="Tìm: sa thải, thử việc, OT, lương..." 
+          oninput="onSearchInput(this.value)"
+          class="w-full bg-slate-900/80 border border-slate-700/60 rounded-xl pl-8 pr-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 transition-all"
+        />
+        <span class="absolute left-2.5 top-2 text-xs text-slate-400 pointer-events-none">🔍</span>
+      </div>
+
+      <!-- Mode Switcher Tabs -->
+      <div class="flex items-center p-1 bg-slate-900/90 border border-slate-800 rounded-xl text-xs font-medium">
+        <button 
+          id="btnModeCanvas" 
+          onclick="switchMode('canvas')" 
+          class="px-2.5 py-1 rounded-lg text-white bg-slate-800 shadow-sm transition-all flex items-center gap-1.5"
+        >
+          <span>🔮</span> <span class="hidden md:inline">Sơ Đồ Canvas</span>
+        </button>
+        <button 
+          id="btnModeBento" 
+          onclick="switchMode('bento')" 
+          class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition-all flex items-center gap-1.5"
+        >
+          <span>🍱</span> <span class="hidden md:inline">Bento Cards</span>
+        </button>
+        <button 
+          id="btnModePenalties" 
+          onclick="switchMode('penalties')" 
+          class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition-all flex items-center gap-1.5"
+        >
+          <span>⚠️</span> <span class="hidden md:inline">Mức Phạt NĐ 12</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN INTERACTIVE WORKSPACE -->
+  <main class="flex-1 relative overflow-hidden flex flex-col">
+
+    <!-- CANVAS CONTROLS (Floating Toolbar) -->
+    <div id="canvasControls" class="absolute bottom-5 left-5 z-20 flex items-center gap-1.5 p-1.5 glass-card rounded-2xl border border-slate-700/60 shadow-xl">
+      <button onclick="zoomCanvas(0.15)" title="Phóng to" class="w-8 h-8 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-200 flex items-center justify-center text-sm font-bold transition-all">＋</button>
+      <button onclick="zoomCanvas(-0.15)" title="Thu nhỏ" class="w-8 h-8 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-200 flex items-center justify-center text-sm font-bold transition-all">－</button>
+      <button onclick="resetCanvasView()" title="Căn giữa màn hình" class="px-2.5 h-8 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-200 text-xs font-medium flex items-center gap-1 transition-all">
+        <span>🎯</span> Căn giữa
+      </button>
+      <span class="w-[1px] h-4 bg-slate-700 mx-1"></span>
+      <button onclick="toggleExpandAllNodes()" id="btnExpandAll" class="px-2.5 h-8 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 text-xs font-medium border border-cyan-500/30 flex items-center gap-1 transition-all">
+        <span>✨</span> Thu gọn tất cả
+      </button>
+    </div>
+
+    <!-- CANVAS VIEWPORT (Interactive Mindmap Canvas) -->
+    <div id="canvasViewport" class="flex-1 w-full h-full relative cursor-grab active:cursor-grabbing overflow-hidden select-none">
+      <!-- Transform Container (Moved by pan and zoom) -->
+      <div id="canvasTransform" class="absolute left-0 top-0 origin-top-left transition-transform duration-75 will-change-transform">
+        <!-- SVG Connections Layer -->
+        <svg id="canvasSvg" class="absolute left-0 top-0 pointer-events-none w-[3200px] h-[2200px] z-0 overflow-visible"></svg>
+        
+        <!-- Nodes DOM Layer -->
+        <div id="canvasNodes" class="relative w-[3200px] h-[2200px] z-10">
+          <!-- Rendered dynamically by JavaScript -->
+        </div>
+      </div>
+    </div>
+
+    <!-- BENTO GRID VIEWPORT (Alternate Modern Card View) -->
+    <div id="bentoViewport" class="flex-1 p-4 md:p-8 overflow-y-auto hidden">
+      <div class="max-w-7xl mx-auto space-y-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-xl font-bold text-white tracking-tight">Bento Grid - Bản Đồ Toàn Diện Bộ Luật Lao Động</h2>
+            <p class="text-xs text-slate-400 mt-0.5">Tổng hợp 7 nhóm trụ cột với các chỉ số đo lường, quyền lợi và nghĩa vụ pháp lý bắt buộc.</p>
+          </div>
+          <span class="text-xs px-3 py-1 rounded-full bg-slate-800 text-slate-400 border border-slate-700 font-mono">
+            7 Trụ cột • 18 Nhánh chi tiết
+          </span>
+        </div>
+        <div id="bentoGridContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-12">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+    </div>
+
+    <!-- PENALTIES MATRIX VIEWPORT (Tra cứu mức phạt NĐ 12/2022/NĐ-CP) -->
+    <div id="penaltiesViewport" class="flex-1 p-4 md:p-8 overflow-y-auto hidden">
+      <div class="max-w-6xl mx-auto space-y-5 pb-12">
+        <div class="p-4 rounded-2xl glass-card border border-rose-500/20 bg-rose-950/10 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <span class="text-2xl">⚠️</span>
+            <div>
+              <h3 class="text-sm md:text-base font-bold text-rose-300">Cẩm Nang Tra Cứu Mức Phạt Vi Phạm Hành Chính (Nghị định 12/2022/NĐ-CP)</h3>
+              <p class="text-xs text-slate-400">Các lỗi phổ biến doanh nghiệp hay mắc phải dẫn đến tranh chấp lao động và thanh tra xử phạt.</p>
+            </div>
+          </div>
+          <span class="text-xs font-mono px-3 py-1 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20 font-semibold">
+            Mức phạt đối với Tổ chức
+          </span>
+        </div>
+        <div id="penaltiesTableContainer" class="space-y-3">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- SLIDE-OVER DETAIL DRAWER (High-tech Glass Modal) -->
+  <aside id="detailDrawer" class="fixed inset-y-0 right-0 w-full sm:w-[540px] glass-card z-50 transform translate-x-full transition-transform duration-300 ease-out flex flex-col border-l border-slate-700/80 shadow-2xl">
+    <!-- Drawer Header -->
+    <div class="p-5 border-b border-slate-800 flex items-center justify-between bg-slate-900/60 shrink-0">
+      <div class="flex items-center gap-2.5">
+        <span id="drawerIcon" class="text-2xl">📋</span>
+        <div>
+          <span id="drawerBadge" class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+            CĂN CỨ PHÁP LÝ
+          </span>
+          <h3 id="drawerTitle" class="text-base font-bold text-white mt-1 leading-snug">
+            Tiêu đề chi tiết
+          </h3>
+        </div>
+      </div>
+      <button onclick="closeDrawer()" class="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center text-sm font-semibold transition-colors">
+        ✕
+      </button>
+    </div>
+
+    <!-- Drawer Content Body -->
+    <div id="drawerBody" class="p-5 overflow-y-auto flex-1 space-y-4 text-xs text-slate-300">
+      <!-- Rendered dynamically -->
+    </div>
+
+    <!-- Drawer Footer Actions -->
+    <div class="p-4 border-t border-slate-800 bg-slate-900/80 flex items-center justify-between shrink-0">
+      <button onclick="copyLegalReference()" id="btnCopyRef" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium border border-slate-700 flex items-center gap-1.5 transition-all">
+        <span>📋</span> Sao chép điều luật
+      </button>
+      <button onclick="closeDrawer()" class="px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs transition-all shadow-md shadow-cyan-500/20">
+        Đóng lại
+      </button>
+    </div>
+  </aside>
+
+  <!-- DRAWER BACKDROP -->
+  <div id="drawerBackdrop" onclick="closeDrawer()" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-40 opacity-0 pointer-events-none transition-opacity duration-300"></div>
+
+  <!-- SCRIPT DATA & ENGINE -->
+  <script>
+    // --- LEGAL KNOWLEDGE BASE ---
+    const laborModel = [
+      {
+        id: "realtime-2026",
+        title: "CẬP NHẬT REALTIME 2026",
+        shortDesc: "Lương tối thiểu Vùng, Tuổi hưu 2026, Luật BHXH 2024 & Công đoàn 2024",
+        icon: "🔥",
+        tag: "Đang Áp Dụng",
+        accentColor: "emerald",
+        badge: "Nghị định 293/2025/NĐ-CP",
+        children: [
+          {
+            id: "wage-min-2026",
+            title: "Lương tối thiểu vùng 2026",
+            lawRef: "Nghị định 293/2025/NĐ-CP (Hiệu lực 01/01/2026)",
+            kpi: "Vùng I: 5.310.000 đ",
+            summary: "Mức sàn tiền lương thấp nhất người sử dụng lao động phải trả cho người lao động làm việc theo HĐLĐ.",
+            content: `
+              <div class="space-y-3">
+                <div class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-emerald-300">
+                  <b>Chính thức thi hành:</b> Nghị định số 293/2025/NĐ-CP quy định mức lương tối thiểu tháng và giờ áp dụng từ <b>01/01/2026</b>.
+                </div>
+                <h4 class="font-bold text-white text-xs uppercase tracking-wider">Bảng Mức Lương Tối Thiểu 4 Vùng:</h4>
+                <div class="rounded-xl border border-slate-700 overflow-hidden">
+                  <table class="w-full text-left text-xs">
+                    <thead class="bg-slate-900/90 text-slate-400 uppercase text-[10px]">
+                      <tr>
+                        <th class="p-2.5">Vùng</th>
+                        <th class="p-2.5">Mức tháng (VNĐ)</th>
+                        <th class="p-2.5">Mức giờ (VNĐ)</th>
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-800">
+                      <tr>
+                        <td class="p-2.5 font-medium text-cyan-300">Vùng I (Hà Nội, TP.HCM, Bình Dương...)</td>
+                        <td class="p-2.5 font-bold text-emerald-400">5.310.000</td>
+                        <td class="p-2.5 text-slate-300">25.500</td>
+                      </tr>
+                      <tr>
+                        <td class="p-2.5 font-medium text-cyan-300">Vùng II (Đà Nẵng, Cần Thơ, Hải Phòng...)</td>
+                        <td class="p-2.5 font-bold text-emerald-400">4.730.000</td>
+                        <td class="p-2.5 text-slate-300">22.700</td>
+                      </tr>
+                      <tr>
+                        <td class="p-2.5 font-medium text-cyan-300">Vùng III (Thị xã, huyện công nghiệp)</td>
+                        <td class="p-2.5 font-bold text-emerald-400">4.140.000</td>
+                        <td class="p-2.5 text-slate-300">20.000</td>
+                      </tr>
+                      <tr>
+                        <td class="p-2.5 font-medium text-cyan-300">Vùng IV (Các địa bàn còn lại)</td>
+                        <td class="p-2.5 font-bold text-emerald-400">3.700.000</td>
+                        <td class="p-2.5 text-slate-300">17.800</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800 space-y-1">
+                  <span class="text-amber-400 font-bold">⚠️ Rủi ro tuân thủ cho Doanh nghiệp:</span>
+                  <p class="text-slate-400">Doanh nghiệp trong KCN/KCX nằm trên các địa bàn có mức lương khác nhau thì phải áp dụng theo vùng có mức <b>cao nhất</b>. Trả lương thấp hơn mức tối thiểu bị xử phạt từ 20 đến 75 triệu đồng theo NĐ 12/2022/NĐ-CP.</p>
+                </div>
+              </div>
+            `
+          },
+          {
+            id: "retire-age-2026",
+            title: "Tuổi nghỉ hưu năm 2026",
+            lawRef: "Điều 169 BLLĐ 2019 & Nghị định 135/2020/NĐ-CP",
+            kpi: "Nam: 61t 6th | Nữ: 57t",
+            summary: "Lộ trình tăng tuổi hưu năm 2026 trong điều kiện bình thường và các trường hợp nghỉ sớm.",
+            content: `
+              <div class="space-y-3">
+                <div class="p-3 rounded-xl bg-cyan-500/10 border border-cyan-500/25 text-cyan-300">
+                  <b>Tuổi nghỉ hưu năm 2026:</b><br>
+                  • Lao động Nam: <b>61 tuổi 06 tháng</b><br>
+                  • Lao động Nữ: <b>57 tuổi 00 tháng</b>
+                </div>
+                <ul class="space-y-1.5 text-slate-300 list-disc pl-4">
+                  <li><b>Nghỉ hưu sớm tối đa 5 tuổi:</b> Người lao động làm công việc nặng nhọc, độc hại, nguy hiểm; làm việc ở vùng có điều kiện KTXH đặc biệt khó khăn từ đủ 15 năm; hoặc suy giảm KNLĐ từ 61% trở lên.</li>
+                  <li><b>Thời điểm nghỉ hưu:</b> Kết thúc ngày cuối cùng của tháng đủ tuổi nghỉ hưu theo quy định.</li>
+                  <li><b>Lộ trình:</b> Đến năm 2028 nam đạt 62 tuổi; đến năm 2035 nữ đạt 60 tuổi.</li>
+                </ul>
+              </div>
+            `
+          },
+          {
+            id: "bhxh-new-2024",
+            title: "Luật BHXH 2024 (Hiệu lực 01/07/2025)",
+            lawRef: "Luật Bảo hiểm xã hội số 41/2024/QH15",
+            kpi: "15 năm đóng hưởng hưu",
+            summary: "Giảm số năm đóng hưởng hưu, siết rút BHXH một lần cho người mới, bổ sung trợ cấp hưu trí xã hội.",
+            content: `
+              <div class="space-y-3">
+                <div class="p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/25 text-indigo-300">
+                  Đột phá lớn nhất về an sinh: Giảm thời gian tham gia BHXH tối thiểu để hưởng lương hưu từ <b>20 năm xuống còn 15 năm</b>.
+                </div>
+                <div class="space-y-2">
+                  <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+                    <b class="text-emerald-400">1. Đóng đủ 15 năm hưởng hưu hàng tháng:</b>
+                    <p class="text-slate-400 mt-0.5">Giúp hàng triệu lao động cao tuổi hoặc tham gia muộn có cơ hội nhận lương hưu và BHYT cả đời.</p>
+                  </div>
+                  <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+                    <b class="text-amber-400">2. Rút BHXH 1 lần phân định mốc 01/7/2025:</b>
+                    <p class="text-slate-400 mt-0.5">Người tham gia trước 01/7/2025 nghỉ việc 12 tháng vẫn được quyền rút. Người mới bắt đầu tham gia từ 01/7/2025 chỉ được rút khi đủ tuổi chưa đủ 15 năm, ra nước ngoài định cư hoặc bệnh hiểm nghèo.</p>
+                  </div>
+                  <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+                    <b class="text-cyan-400">3. Trợ cấp hưu trí xã hội từ 75 tuổi:</b>
+                    <p class="text-slate-400 mt-0.5">Công dân từ đủ 75 tuổi (70 tuổi nếu nghèo/cận nghèo) không có lương hưu được ngân sách cấp trợ cấp và thẻ BHYT miễn phí.</p>
+                  </div>
+                </div>
+              </div>
+            `
+          },
+          {
+            id: "union-law-2024",
+            title: "Luật Công đoàn 2024 & NĐ 105/2026",
+            lawRef: "Luật Công đoàn 50/2024/QH15 & NĐ 105/2026/NĐ-CP",
+            kpi: "2% quỹ lương BHXH",
+            summary: "Trách nhiệm đóng kinh phí công đoàn, thời hạn nộp và các trường hợp được miễn giảm hoãn đóng.",
+            content: `
+              <div class="space-y-3">
+                <p>Nghị định 105/2026/NĐ-CP (hiệu lực 16/05/2026) quy định chi tiết về quản lý tài chính công đoàn:</p>
+                <ul class="space-y-1.5 text-slate-300 list-disc pl-4">
+                  <li><b>Mức đóng:</b> Tiếp tục duy trì <b>2% quỹ tiền lương</b> đóng BHXH bắt buộc. Doanh nghiệp bắt buộc phải đóng dù đã thành lập hay chưa thành lập công đoàn cơ sở.</li>
+                  <li><b>Hạn đóng:</b> Hàng tháng cùng thời điểm đóng BHXH (chậm nhất vào ngày cuối cùng của tháng kế tiếp).</li>
+                  <li><b>Hỗ trợ DN khó khăn:</b> Miễn nộp khi phá sản/giải thể; Giảm mức đóng khi gặp bất khả kháng; Tạm hoãn đóng tối đa 12 tháng khi phải tạm dừng sản xuất kinh doanh.</li>
+                </ul>
+              </div>
+            `
+          }
+        ]
+      },
+      {
+        id: "contract-employment",
+        title: "HỢP ĐỒNG & TUYỂN DỤNG",
+        shortDesc: "Thử việc, 02 loại HĐLĐ, quyền đơn phương chấm dứt và trợ cấp thôi việc",
+        icon: "📝",
+        tag: "Nền Tảng",
+        accentColor: "cyan",
+        badge: "Điều 13 - 48 BLLĐ",
+        children: [
+          {
+            id: "node-probation-rules",
+            title: "Thời gian & Mức lương thử việc",
+            lawRef: "Điều 24, 25, 27 Bộ luật Lao động 2019",
+            kpi: "Tối đa 180 ngày | Lương ≥ 85%",
+            summary: "Quy định trần thời gian thử việc theo từng chức danh và lương thử việc.",
+            content: `
+              <div class="space-y-3">
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                  <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+                    <span class="text-amber-400 font-bold">180 ngày</span>
+                    <p class="text-slate-400 mt-1">Người quản lý doanh nghiệp theo Luật Doanh nghiệp.</p>
+                  </div>
+                  <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+                    <span class="text-cyan-400 font-bold">60 ngày</span>
+                    <p class="text-slate-400 mt-1">Trình độ chuyên môn từ Cao đẳng, Đại học trở lên.</p>
+                  </div>
+                  <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+                    <span class="text-emerald-400 font-bold">30 ngày</span>
+                    <p class="text-slate-400 mt-1">Trình độ trung cấp, công nhân kỹ thuật, nghiệp vụ.</p>
+                  </div>
+                  <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+                    <span class="text-slate-400 font-bold">06 ngày làm việc</span>
+                    <p class="text-slate-400 mt-1">Các công việc lao động giản đơn khác.</p>
+                  </div>
+                </div>
+                <div class="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300">
+                  🚫 <b>Điều cấm:</b> Không thử việc đối với HĐLĐ dưới 01 tháng. Chỉ được thử việc 01 lần duy nhất cho một vị trí. Lương thử việc tối thiểu bằng <b>85%</b> lương chính thức.
+                </div>
+              </div>
+            `
+          },
+          {
+            id: "node-contract-types",
+            title: "Chỉ còn 02 loại Hợp đồng Lao động",
+            lawRef: "Điều 20 Bộ luật Lao động 2019",
+            kpi: "Xóa bỏ HĐ thời vụ",
+            summary: "BLLĐ 2019 chính thức xóa bỏ HĐ thời vụ, chỉ còn HĐ xác định và không xác định thời hạn.",
+            content: `
+              <div class="space-y-3">
+                <div class="space-y-2">
+                  <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+                    <b class="text-cyan-400">1. HĐLĐ không xác định thời hạn:</b>
+                    <p class="text-slate-400 mt-1">Hai bên không xác định thời hạn và thời điểm chấm dứt hiệu lực.</p>
+                  </div>
+                  <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+                    <b class="text-amber-400">2. HĐLĐ xác định thời hạn:</b>
+                    <p class="text-slate-400 mt-1">Thời hạn tối đa không quá <b>36 tháng</b>. Chỉ được ký tối đa <b>02 lần liên tiếp</b>. Lần thứ 3 nếu tiếp tục làm việc thì bắt buộc phải chuyển sang HĐLĐ không xác định thời hạn.</p>
+                  </div>
+                </div>
+              </div>
+            `
+          },
+          {
+            id: "node-termination-rules",
+            title: "Quyền đơn phương chấm dứt HĐLĐ",
+            lawRef: "Điều 35, 36, 46 BLLĐ 2019",
+            kpi: "NLĐ nghỉ không cần lý do",
+            summary: "Quy tắc báo trước 45/30/3 ngày và các trường hợp được nghỉ việc ngay lập tức.",
+            content: `
+              <div class="space-y-3">
+                <h4 class="font-bold text-white text-xs uppercase tracking-wider">NLĐ nghỉ việc (Điều 35):</h4>
+                <p class="text-slate-300">Có quyền nghỉ việc bất kỳ lúc nào <b>không cần lý do</b>, chỉ cần tuân thủ thời gian báo trước:</p>
+                <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                  <div class="p-2 rounded-lg bg-slate-900 border border-slate-800">
+                    <span class="text-cyan-400 font-bold">45 ngày</span>
+                    <p class="text-[10px] text-slate-400">HĐ không xác định</p>
+                  </div>
+                  <div class="p-2 rounded-lg bg-slate-900 border border-slate-800">
+                    <span class="text-amber-400 font-bold">30 ngày</span>
+                    <p class="text-[10px] text-slate-400">HĐ xác định 12-36th</p>
+                  </div>
+                  <div class="p-2 rounded-lg bg-slate-900 border border-slate-800">
+                    <span class="text-emerald-400 font-bold">03 ngày</span>
+                    <p class="text-[10px] text-slate-400">HĐ dưới 12 tháng</p>
+                  </div>
+                </div>
+                <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+                  <b class="text-emerald-400">Nghỉ ngay không cần báo trước:</b>
+                  <p class="text-slate-400 mt-1">Khi bị nợ lương, bố trí sai công việc, bị ngược đãi, quấy rối tình dục, hoặc lao động nữ mang thai theo chỉ định bác sĩ.</p>
+                </div>
+              </div>
+            `
+          }
+        ]
+      },
+      {
+        id: "salary-welfare",
+        title: "TIỀN LƯƠNG & CHẾ ĐỘ PHÚC LỢI",
+        shortDesc: "Thang bảng lương tự chủ, cách tính làm thêm giờ 150-200-300%, làm đêm và thưởng",
+        icon: "💰",
+        tag: "Quyền Lợi",
+        accentColor: "amber",
+        badge: "Điều 90 - 104 BLLĐ",
+        children: [
+          {
+            id: "node-salary-scale",
+            title: "Tự chủ Thang bảng lương",
+            lawRef: "Điều 93 Bộ luật Lao động 2019",
+            kpi: "Không cần nộp Sở LĐ",
+            summary: "Doanh nghiệp tự xây dựng và công khai thang lương, định mức tại nơi làm việc.",
+            content: `
+              <div class="space-y-3">
+                <p>Doanh nghiệp tự ban hành thang bảng lương, định mức lao động làm cơ sở tuyển dụng, trả lương:</p>
+                <ul class="space-y-1.5 list-disc pl-4 text-slate-300">
+                  <li>Phải tham khảo ý kiến của ban đại diện người lao động tại cơ sở.</li>
+                  <li>Phải <b>công khai tại nơi làm việc</b> trước khi áp dụng.</li>
+                  <li>Đã <b>bãi bỏ thủ tục nộp/đăng ký thang bảng lương</b> cho Phòng LĐ-TB&XH cấp huyện.</li>
+                  <li>Mỗi lần trả lương phải cung cấp <b>bảng kê chi tiết lương</b> (lương cơ bản, OT, khấu trừ, thuế...).</li>
+                </ul>
+              </div>
+            `
+          },
+          {
+            id: "node-ot-calc",
+            title: "Công thức tính lương Làm thêm giờ (OT)",
+            lawRef: "Điều 98 Bộ luật Lao động 2019",
+            kpi: "150% - 200% - 300%",
+            summary: "Mức lương làm thêm ngày thường, ngày nghỉ tuần, ngày lễ tết và làm việc ban đêm.",
+            content: `
+              <div class="space-y-3">
+                <div class="rounded-xl border border-slate-700 overflow-hidden text-xs">
+                  <table class="w-full text-left">
+                    <thead class="bg-slate-900 text-slate-400 text-[10px] uppercase">
+                      <tr>
+                        <th class="p-2.5">Thời điểm</th>
+                        <th class="p-2.5">Ban ngày</th>
+                        <th class="p-2.5">Ban đêm (22h - 6h)</th>
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-800">
+                      <tr>
+                        <td class="p-2.5 font-medium">Ngày làm việc thường</td>
+                        <td class="p-2.5 font-bold text-amber-400">150%</td>
+                        <td class="p-2.5 font-bold text-amber-300">200% / 210%</td>
+                      </tr>
+                      <tr>
+                        <td class="p-2.5 font-medium">Ngày nghỉ hàng tuần</td>
+                        <td class="p-2.5 font-bold text-emerald-400">200%</td>
+                        <td class="p-2.5 font-bold text-emerald-300">270%</td>
+                      </tr>
+                      <tr>
+                        <td class="p-2.5 font-medium">Ngày Lễ, Tết hưởng lương</td>
+                        <td class="p-2.5 font-bold text-rose-400">300%</td>
+                        <td class="p-2.5 font-bold text-rose-300">390%</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <p class="text-[11px] text-slate-400">
+                  <i>*Lưu ý: Mức 300% làm việc ngày Lễ, Tết chưa bao gồm tiền lương của ngày nghỉ lễ, tết đối với NLĐ hưởng lương ngày.</i>
+                </p>
+              </div>
+            `
+          }
+        ]
+      },
+      {
+        id: "hours-holidays",
+        title: "THỜI GIỜ LÀM VIỆC & NGHỈ PHÉP",
+        shortDesc: "Trần 48h/tuần, trần OT 40h/tháng & 200h-300h/năm, 11 ngày nghỉ lễ tết và phép năm",
+        icon: "⏱️",
+        tag: "Thời Gian",
+        accentColor: "blue",
+        badge: "Điều 105 - 116 BLLĐ",
+        children: [
+          {
+            id: "node-working-hours",
+            title: "Khung giờ chuẩn & Trần làm thêm giờ",
+            lawRef: "Điều 105, 107 Bộ luật Lao động 2019",
+            kpi: "Trần OT 40h/tháng | 200h/năm",
+            summary: "Quy chuẩn giờ làm việc bình thường và trần OT tối đa được phép huy động.",
+            content: `
+              <div class="space-y-3">
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                  <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+                    <span class="text-cyan-400 font-bold">Giờ làm việc chuẩn:</span>
+                    <p class="text-slate-400 mt-1">Không quá <b>08 giờ/ngày</b> và <b>48 giờ/tuần</b>. Khuyến khích tuần 40 giờ.</p>
+                  </div>
+                  <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+                    <span class="text-amber-400 font-bold">Trần OT trong ngày:</span>
+                    <p class="text-slate-400 mt-1">Không quá 50% số giờ làm việc chuẩn (tối đa làm thêm 4h/ngày).</p>
+                  </div>
+                </div>
+                <div class="p-3 rounded-xl bg-rose-500/10 border border-rose-500/25 text-rose-300">
+                  ⚠️ <b>Trần OT tháng & năm:</b> Không vượt quá <b>40 giờ/tháng</b> và <b>200 giờ/năm</b>. Ngành đặc thù (dệt may, da giày, chế biến thủy hải sản, điện tử...) được tối đa <b>300 giờ/năm</b> nhưng phải thông báo bằng văn bản cho Sở LĐ-TB&XH.
+                </div>
+              </div>
+            `
+          },
+          {
+            id: "node-holidays-leave",
+            title: "11 Ngày nghỉ Lễ Tết & Phép năm",
+            lawRef: "Điều 112, 113, 114 BLLĐ 2019",
+            kpi: "11 ngày lễ | Phép năm 12d+",
+            summary: "Chi tiết các ngày nghỉ lễ hưởng nguyên lương và ngày nghỉ phép theo thâm niên.",
+            content: `
+              <div class="space-y-3 text-xs">
+                <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 space-y-1">
+                  <b class="text-cyan-400">11 Ngày Lễ, Tết hưởng 100% lương:</b>
+                  <p class="text-slate-300">• Tết Dương lịch: 1 ngày (01/01)<br>• Tết Âm lịch: 5 ngày<br>• Ngày Chiến thắng: 1 ngày (30/04)<br>• Quốc tế Lao động: 1 ngày (01/05)<br>• Quốc khánh: 2 ngày (02/09 và 1 ngày liền kề)<br>• Giỗ Tổ Hùng Vương: 1 ngày (10/03 ÂL).</p>
+                </div>
+                <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 space-y-1">
+                  <b class="text-emerald-400">Phép năm & Thâm niên:</b>
+                  <p class="text-slate-300">Làm đủ 12 tháng được nghỉ <b>12 ngày</b> phép năm. Cứ mỗi <b>05 năm làm việc</b> tại cùng doanh nghiệp thì được <b>tăng thêm 01 ngày phép</b>.</p>
+                </div>
+              </div>
+            `
+          }
+        ]
+      },
+      {
+        id: "discipline-dismissal",
+        title: "KỶ LUẬT LAO ĐỘNG & SA THẢI",
+        shortDesc: "04 hình thức kỷ luật, căn cứ sa thải Điều 125, thủ tục phiên họp và điều cấm kỵ",
+        icon: "🔨",
+        tag: "Kỷ Luật",
+        accentColor: "rose",
+        badge: "Điều 117 - 133 BLLĐ",
+        children: [
+          {
+            id: "node-discipline-forms",
+            title: "04 Hình thức kỷ luật duy nhất",
+            lawRef: "Điều 124, 127 Bộ luật Lao động 2019",
+            kpi: "Cấm phạt tiền/cắt lương",
+            summary: "Pháp luật chỉ cho phép đúng 4 hình thức kỷ luật và nghiêm cấm xử phạt bằng tiền.",
+            content: `
+              <div class="space-y-3">
+                <div class="space-y-1.5 text-xs">
+                  <div class="p-2 rounded-lg bg-slate-900 border border-slate-800 font-medium text-slate-300">1. Khiển trách</div>
+                  <div class="p-2 rounded-lg bg-slate-900 border border-slate-800 font-medium text-amber-400">2. Kéo dài thời hạn nâng lương không quá 06 tháng</div>
+                  <div class="p-2 rounded-lg bg-slate-900 border border-slate-800 font-medium text-orange-400">3. Cách chức</div>
+                  <div class="p-2 rounded-lg bg-slate-900 border border-slate-800 font-medium text-rose-400">4. Sa thải (Hình thức nặng nhất)</div>
+                </div>
+                <div class="p-3 rounded-xl bg-rose-500/10 border border-rose-500/25 text-rose-300 text-xs">
+                  🚫 <b>Điều cấm tuyệt đối:</b> Cấm xâm phạm thân thể, nhân phẩm; <b>Cấm phạt tiền, cắt lương</b> thay việc xử lý kỷ luật; Cấm xử lý hành vi chưa ghi trong Nội quy lao động.
+                </div>
+              </div>
+            `
+          },
+          {
+            id: "node-dismissal-criteria",
+            title: "Căn cứ áp dụng hình thức Sa thải",
+            lawRef: "Điều 125 Bộ luật Lao động 2019",
+            kpi: "Tự ý bỏ việc 5 ngày liên tục",
+            summary: "Các hành vi vi phạm nghiêm trọng người sử dụng lao động được quyền sa thải.",
+            content: `
+              <div class="space-y-3 text-xs text-slate-300">
+                <p>Doanh nghiệp chỉ được quyền áp dụng hình thức sa thải khi có một trong các căn cứ sau:</p>
+                <ul class="space-y-1.5 list-disc pl-4">
+                  <li>Trộm cắp, tham ô, đánh bạc, cố ý gây thương tích, sử dụng ma túy tại nơi làm việc.</li>
+                  <li>Tiết lộ bí mật kinh doanh, bí mật công nghệ, xâm phạm quyền SHTT gây thiệt hại nghiêm trọng hoặc đe dọa gây thiệt hại đặc biệt nghiêm trọng; quấy rối tình dục tại nơi làm việc.</li>
+                  <li>Đã bị kéo dài thời hạn nâng lương hoặc cách chức mà tái phạm trong thời gian chưa xóa kỷ luật.</li>
+                  <li>Tự ý bỏ việc <b>05 ngày cộng dồn trong 30 ngày</b> hoặc <b>20 ngày cộng dồn trong 365 ngày</b> mà không có lý do chính đáng.</li>
+                </ul>
+              </div>
+            `
+          }
+        ]
+      },
+      {
+        id: "female-welfare",
+        title: "BẢO VỆ LAO ĐỘNG NỮ & THAI SẢN",
+        shortDesc: "Cấm sa thải người mang thai/nuôi con nhỏ, nghỉ 60 phút/ngày, chuyển việc nhẹ",
+        icon: "🤰",
+        tag: "Bảo Vệ",
+        accentColor: "pink",
+        badge: "Điều 135 - 142 BLLĐ",
+        children: [
+          {
+            id: "node-female-rights",
+            title: "Quyền lợi thai sản & Nuôi con nhỏ",
+            lawRef: "Điều 137, 139 Bộ luật Lao động 2019",
+            kpi: "Nghỉ 60p/ngày con < 12th",
+            summary: "Cấm sa thải phụ nữ mang thai/nuôi con dưới 12 tháng, chế độ nghỉ hành kinh và nuôi con.",
+            content: `
+              <div class="space-y-3 text-xs text-slate-300">
+                <div class="p-3 rounded-xl bg-pink-500/10 border border-pink-500/25 text-pink-300">
+                  <b>Cấm sa thải:</b> Tuyệt đối không được sa thải hoặc đơn phương chấm dứt HĐLĐ vì lý do kết hôn, mang thai, nghỉ thai sản hoặc nuôi con dưới 12 tháng tuổi.
+                </div>
+                <ul class="space-y-1.5 list-disc pl-4">
+                  <li><b>Nghỉ thai sản:</b> 06 tháng (mang thai đôi trở lên thì từ con thứ hai được nghỉ thêm 01 tháng/con).</li>
+                  <li><b>Nghỉ trong giờ làm:</b> Lao động nữ hành kinh được nghỉ <b>30 phút/ngày</b>; nuôi con dưới 12 tháng tuổi được nghỉ <b>60 phút/ngày</b> mà vẫn hưởng đủ lương.</li>
+                  <li><b>Chuyển việc nhẹ hơn:</b> Lao động nữ làm nghề nặng nhọc, độc hại mang thai từ tháng thứ 7 được chuyển việc nhẹ hơn hoặc giảm 01 giờ làm/ngày giữ nguyên lương.</li>
+                </ul>
+              </div>
+            `
+          }
+        ]
+      },
+      {
+        id: "insurance-dispute",
+        title: "BẢO HIỂM (34%) & TRANH CHẤP",
+        shortDesc: "Cơ cấu đóng bảo hiểm 34%, trình tự hòa giải, hội đồng trọng tài và khởi kiện tòa án",
+        icon: "🛡️",
+        tag: "Nghĩa Vụ",
+        accentColor: "purple",
+        badge: "Chương XIV BLLĐ",
+        children: [
+          {
+            id: "node-insurance-table",
+            title: "Bảng tỷ lệ đóng Bảo hiểm & Công đoàn",
+            lawRef: "Luật BHXH, BHYT, Việc làm, Công đoàn",
+            kpi: "DN: 23.5% | NLĐ: 10.5%",
+            summary: "Chi tiết các quỹ hưu trí, ốm đau, tai nạn, BHYT, BHTN và kinh phí công đoàn.",
+            content: `
+              <div class="space-y-3">
+                <div class="rounded-xl border border-slate-700 overflow-hidden text-xs">
+                  <table class="w-full text-left">
+                    <thead class="bg-slate-900 text-slate-400 text-[10px] uppercase">
+                      <tr>
+                        <th class="p-2.5">Quỹ trích nộp</th>
+                        <th class="p-2.5">DN đóng</th>
+                        <th class="p-2.5">NLĐ đóng</th>
+                        <th class="p-2.5">Tổng cộng</th>
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-800">
+                      <tr>
+                        <td class="p-2.5 font-medium">Hưu trí - Tử tuất</td>
+                        <td class="p-2.5 text-cyan-400">14.0%</td>
+                        <td class="p-2.5 text-amber-400">8.0%</td>
+                        <td class="p-2.5 font-bold">22.0%</td>
+                      </tr>
+                      <tr>
+                        <td class="p-2.5 font-medium">Ốm đau - Thai sản</td>
+                        <td class="p-2.5 text-cyan-400">3.0%</td>
+                        <td class="p-2.5 text-slate-500">0%</td>
+                        <td class="p-2.5 font-bold">3.0%</td>
+                      </tr>
+                      <tr>
+                        <td class="p-2.5 font-medium">Tai nạn LĐ - Bệnh nghề nghiệp</td>
+                        <td class="p-2.5 text-cyan-400">0.5%</td>
+                        <td class="p-2.5 text-slate-500">0%</td>
+                        <td class="p-2.5 font-bold">0.5%</td>
+                      </tr>
+                      <tr>
+                        <td class="p-2.5 font-medium">Bảo hiểm Y tế (BHYT)</td>
+                        <td class="p-2.5 text-cyan-400">3.0%</td>
+                        <td class="p-2.5 text-amber-400">1.5%</td>
+                        <td class="p-2.5 font-bold">4.5%</td>
+                      </tr>
+                      <tr>
+                        <td class="p-2.5 font-medium">Bảo hiểm Thất nghiệp (BHTN)</td>
+                        <td class="p-2.5 text-cyan-400">1.0%</td>
+                        <td class="p-2.5 text-amber-400">1.0%</td>
+                        <td class="p-2.5 font-bold">2.0%</td>
+                      </tr>
+                      <tr>
+                        <td class="p-2.5 font-medium">Kinh phí Công đoàn</td>
+                        <td class="p-2.5 text-purple-400">2.0%</td>
+                        <td class="p-2.5 text-slate-500">0%</td>
+                        <td class="p-2.5 font-bold text-purple-400">2.0%</td>
+                      </tr>
+                      <tr class="bg-slate-900/90 font-bold">
+                        <td class="p-2.5 text-white">TỔNG CỘNG</td>
+                        <td class="p-2.5 text-cyan-400">23.5%</td>
+                        <td class="p-2.5 text-amber-400">10.5%</td>
+                        <td class="p-2.5 text-emerald-400">34.0%</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            `
+          },
+          {
+            id: "node-dispute-flow",
+            title: "Trình tự Giải quyết Tranh chấp Lao động",
+            lawRef: "Điều 187 - 194 Bộ luật Lao động 2019",
+            kpi: "Hòa giải viên → Trọng tài → Tòa án",
+            summary: "Thủ tục xử lý tranh chấp lao động cá nhân và tập thể.",
+            content: `
+              <div class="space-y-3 text-xs text-slate-300">
+                <div class="space-y-2">
+                  <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+                    <b class="text-cyan-400">Bước 1: Hòa giải viên lao động:</b>
+                    <p class="text-slate-400 mt-1">Là thủ tục bắt buộc (ngoại trừ tranh chấp sa thải, đơn phương chấm dứt, bồi thường thiệt hại, BHXH thì được kiện thẳng ra Tòa).</p>
+                  </div>
+                  <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+                    <b class="text-amber-400">Bước 2: Hội đồng trọng tài lao động:</b>
+                    <p class="text-slate-400 mt-1">Do hai bên cùng đồng thuận lựa chọn giải quyết.</p>
+                  </div>
+                  <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+                    <b class="text-rose-400">Bước 3: Tòa án nhân dân:</b>
+                    <p class="text-slate-400 mt-1">Khởi kiện tại TAND có thẩm quyền để ra phán quyết có hiệu lực thi hành án cưỡng chế.</p>
+                  </div>
+                </div>
+              </div>
+            `
+          }
+        ]
+      }
+    ];
+
+    // --- COMPLIANCE PENALTIES MATRIX (NĐ 12/2022/NĐ-CP) ---
+    const penaltiesData = [
+      {
+        behavior: "Giữ bản chính giấy tờ tùy thân, văn bằng, chứng chỉ của người lao động khi giao kết HĐLĐ",
+        fineOrg: "40.000.000 - 50.000.000 đ",
+        reference: "Khoản 2 Điều 9 NĐ 12/2022/NĐ-CP",
+        remedy: "Buộc trả lại bản chính giấy tờ cho người lao động"
+      },
+      {
+        behavior: "Yêu cầu người lao động đặt cọc tiền hoặc tài sản khác để bảo đảm thực hiện HĐLĐ",
+        fineOrg: "40.000.000 - 50.000.000 đ",
+        reference: "Khoản 2 Điều 9 NĐ 12/2022/NĐ-CP",
+        remedy: "Buộc hoàn trả toàn bộ số tiền hoặc tài sản đã giữ cộng lãi suất"
+      },
+      {
+        behavior: "Áp dụng hình thức phạt tiền, cắt lương thay cho việc xử lý kỷ luật lao động",
+        fineOrg: "40.000.000 - 80.000.000 đ",
+        reference: "Khoản 3 Điều 19 NĐ 12/2022/NĐ-CP",
+        remedy: "Buộc hoàn trả toàn bộ số tiền đã phạt hoặc đã cắt của NLĐ"
+      },
+      {
+        behavior: "Trả lương thấp hơn mức lương tối thiểu vùng do Chính phủ quy định",
+        fineOrg: "40.000.000 - 150.000.000 đ",
+        reference: "Điều 17 NĐ 12/2022/NĐ-CP",
+        remedy: "Buộc trả đủ tiền lương cộng thêm khoản tiền lãi của số tiền trả thiếu"
+      },
+      {
+        behavior: "Huy động người lao động làm thêm giờ vượt quá số giờ quy định (quá 40h/tháng hoặc 200h-300h/năm)",
+        fineOrg: "40.000.000 - 100.000.000 đ",
+        reference: "Khoản 3 Điều 18 NĐ 12/2022/NĐ-CP",
+        remedy: "Đình chỉ hoặc xử lý theo quy định thanh tra lao động"
+      },
+      {
+        behavior: "Sa thải hoặc đơn phương chấm dứt HĐLĐ với lao động nữ vì lý do kết hôn, mang thai, nghỉ thai sản, nuôi con dưới 12 tháng",
+        fineOrg: "20.000.000 - 40.000.000 đ",
+        reference: "Khoản 2 Điều 28 NĐ 12/2022/NĐ-CP",
+        remedy: "Buộc nhận người lao động trở lại làm việc và bồi thường đầy đủ tiền lương"
+      },
+      {
+        behavior: "Không đóng, chậm đóng, trốn đóng Bảo hiểm xã hội bắt buộc, BHTN",
+        fineOrg: "12% - 15% tổng số tiền phải đóng (tối đa 150 triệu)",
+        reference: "Khoản 5 Điều 39 NĐ 12/2022/NĐ-CP",
+        remedy: "Buộc truy nộp toàn bộ số tiền trốn đóng cộng lãi phát sinh"
+      }
+    ];
+
+    // --- CANVAS ENGINE STATE ---
+    let panX = 120;
+    let panY = 180;
+    let scale = 0.9;
+    let isDragging = false;
+    let startX, startY;
+    let activeMode = "canvas";
+    let collapsedNodes = new Set();
+    let currentDetail = null;
+
+    // --- DOM REFERENCES ---
+    const canvasViewport = document.getElementById("canvasViewport");
+    const canvasTransform = document.getElementById("canvasTransform");
+    const canvasSvg = document.getElementById("canvasSvg");
+    const canvasNodes = document.getElementById("canvasNodes");
+
+    // --- COLOR MAPPINGS ---
+    const colorClasses = {
+      emerald: {
+        glow: "hover:border-emerald-400 hover:shadow-emerald-500/20",
+        badge: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+        stroke: "#10b981",
+        dot: "bg-emerald-400"
+      },
+      cyan: {
+        glow: "hover:border-cyan-400 hover:shadow-cyan-500/20",
+        badge: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
+        stroke: "#06b6d4",
+        dot: "bg-cyan-400"
+      },
+      amber: {
+        glow: "hover:border-amber-400 hover:shadow-amber-500/20",
+        badge: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+        stroke: "#f59e0b",
+        dot: "bg-amber-400"
+      },
+      blue: {
+        glow: "hover:border-blue-400 hover:shadow-blue-500/20",
+        badge: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+        stroke: "#3b82f6",
+        dot: "bg-blue-400"
+      },
+      rose: {
+        glow: "hover:border-rose-400 hover:shadow-rose-500/20",
+        badge: "bg-rose-500/10 text-rose-400 border-rose-500/20",
+        stroke: "#f43f5e",
+        dot: "bg-rose-400"
+      },
+      pink: {
+        glow: "hover:border-pink-400 hover:shadow-pink-500/20",
+        badge: "bg-pink-500/10 text-pink-400 border-pink-500/20",
+        stroke: "#ec4899",
+        dot: "bg-pink-400"
+      },
+      purple: {
+        glow: "hover:border-purple-400 hover:shadow-purple-500/20",
+        badge: "bg-purple-500/10 text-purple-400 border-purple-500/20",
+        stroke: "#a855f7",
+        dot: "bg-purple-400"
+      }
+    };
+
+    // --- INITIALIZE CANVAS NODES & GRAPH LAYOUT ---
+    function renderCanvasGraph() {
+      canvasNodes.innerHTML = "";
+      canvasSvg.innerHTML = "";
+
+      const rootX = 140;
+      const rootY = 700;
+
+      // 1. Render Root Node
+      const rootNode = document.createElement("div");
+      rootNode.id = "node-root";
+      rootNode.className = "absolute glass-card p-5 rounded-3xl border-2 border-cyan-500/40 glow-cyan cursor-pointer transition-all duration-300 w-80 text-left z-20";
+      rootNode.style.left = `${rootX}px`;
+      rootNode.style.top = `${rootY}px`;
+      rootNode.innerHTML = `
+        <div class="flex items-center gap-3 mb-2">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-500 to-emerald-400 flex items-center justify-center text-2xl shadow-md">
+            ⚖️
+          </div>
+          <div>
+            <span class="text-[10px] px-2 py-0.5 rounded-full font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+              TRUNG TÂM PHÁP LÝ
+            </span>
+            <h2 class="text-sm font-extrabold text-white mt-0.5 tracking-tight">BỘ LUẬT LAO ĐỘNG</h2>
+          </div>
+        </div>
+        <p class="text-[11px] text-slate-300 leading-relaxed">
+          Văn bản hợp nhất số 125/VBHN-VPQH & BLLĐ 2019 cùng các Nghị định hướng dẫn hiện hành.
+        </p>
+        <div class="mt-3 pt-2.5 border-t border-slate-700/60 flex items-center justify-between text-[10px] text-slate-400">
+          <span>7 Trụ cột lớn</span>
+          <span class="text-cyan-400 font-semibold">Bấm nhánh để xem →</span>
+        </div>
+      `;
+      rootNode.onclick = () => openDrawer({
+        title: "Bộ luật Lao động Việt Nam (Tổng Quan)",
+        icon: "⚖️",
+        tag: "Khung Pháp Lý",
+        lawRef: "Bộ luật Lao động 45/2019/QH14 & VBHN 125/VBHN-VPQH",
+        content: `
+          <div class="space-y-3">
+            <p>Bộ luật Lao động điều chỉnh quan hệ lao động giữa người lao động và người sử dụng lao động, thiết lập các tiêu chuẩn lao động tối thiểu nhằm bảo vệ quyền và lợi ích hợp pháp của các bên.</p>
+            <div class="p-3 rounded-xl bg-cyan-500/10 border border-cyan-500/25 text-cyan-300">
+              <b>Trụ cột cốt lõi:</b> Tiền lương tối thiểu vùng, Thời giờ làm việc và nghỉ ngơi, Kỷ luật sa thải, Bảo hiểm xã hội và An toàn vệ sinh lao động.
+            </div>
+            <p class="text-slate-400">Khám phá từng nhánh trên canvas để tra cứu chi tiết mức thưởng, lương OT, điều kiện nghỉ việc và các mức phạt hành chính theo Nghị định 12/2022/NĐ-CP.</p>
+          </div>
+        `
+      });
+      canvasNodes.appendChild(rootNode);
+
+      // 2. Render Branches (Level 1) & Leaf Nodes (Level 2)
+      let branchY = 80;
+      const branchX = 580;
+      const childX = 1040;
+
+      laborModel.forEach((branch, bIdx) => {
+        const theme = colorClasses[branch.accentColor] || colorClasses.cyan;
+        const branchTop = branchY;
+        const isCollapsed = collapsedNodes.has(branch.id);
+
+        // Branch Node Element
+        const branchEl = document.createElement("div");
+        branchEl.id = `branch-${branch.id}`;
+        branchEl.className = `absolute glass-card glass-card-hover p-4 rounded-2xl w-84 cursor-pointer z-10 transition-all border border-slate-700/80 ${theme.glow}`;
+        branchEl.style.left = `${branchX}px`;
+        branchEl.style.top = `${branchTop}px`;
+        branchEl.innerHTML = `
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">${branch.icon}</span>
+              <h3 class="text-xs font-bold text-white tracking-wide">${branch.title}</h3>
+            </div>
+            <span class="text-[9px] px-2 py-0.5 rounded-full font-semibold ${theme.badge}">${branch.tag}</span>
+          </div>
+          <p class="text-[11px] text-slate-300 line-clamp-2">${branch.shortDesc}</p>
+          <div class="mt-3 pt-2 border-t border-slate-800 flex items-center justify-between text-[10px]">
+            <span class="text-slate-400 font-mono">${branch.badge}</span>
+            <button onclick="event.stopPropagation(); toggleNodeCollapse('${branch.id}')" class="px-2 py-0.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition-colors">
+              ${isCollapsed ? `+ Mở (${branch.children.length})` : `- Thu gọn`}
+            </button>
+          </div>
+        `;
+        branchEl.onclick = () => openDrawer({
+          title: branch.title,
+          icon: branch.icon,
+          tag: branch.tag,
+          lawRef: branch.badge,
+          content: `
+            <div class="space-y-3">
+              <p class="text-slate-200">${branch.shortDesc}</p>
+              <h4 class="font-bold text-white text-xs uppercase tracking-wider">Các nội dung chi tiết trong trụ cột này:</h4>
+              <div class="space-y-2">
+                ${branch.children.map(c => `
+                  <div onclick="selectChildFromDrawer('${c.id}')" class="p-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 cursor-pointer transition-all">
+                    <div class="flex items-center justify-between">
+                      <b class="text-cyan-300">${c.title}</b>
+                      <span class="text-[10px] text-emerald-400 font-semibold">${c.kpi || ''}</span>
+                    </div>
+                    <p class="text-[11px] text-slate-400 mt-1">${c.summary}</p>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `
+        });
+        canvasNodes.appendChild(branchEl);
+
+        // Draw Bezier from Root to Branch
+        drawBezierCurve(
+          rootX + 320, rootY + 60,
+          branchX, branchTop + 45,
+          theme.stroke
+        );
+
+        // Render Children if not collapsed
+        let childTop = branchTop;
+        if (!isCollapsed && branch.children) {
+          branch.children.forEach((child, cIdx) => {
+            const childEl = document.createElement("div");
+            childEl.id = `child-${child.id}`;
+            childEl.className = `absolute glass-card glass-card-hover p-3.5 rounded-xl w-80 cursor-pointer z-10 transition-all border border-slate-800 hover:border-cyan-500/50`;
+            childEl.style.left = `${childX}px`;
+            childEl.style.top = `${childTop}px`;
+            childEl.innerHTML = `
+              <div class="flex items-center justify-between">
+                <h4 class="text-xs font-bold text-slate-100">${child.title}</h4>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">${child.kpi || 'Quy định'}</span>
+              </div>
+              <p class="text-[11px] text-slate-400 mt-1 line-clamp-1">${child.summary}</p>
+              <div class="mt-2 text-[10px] text-cyan-400/90 font-mono truncate">
+                ⚖️ ${child.lawRef}
+              </div>
+            `;
+            childEl.onclick = () => openDrawer({
+              title: child.title,
+              icon: branch.icon,
+              tag: branch.title,
+              lawRef: child.lawRef,
+              content: child.content
+            });
+            canvasNodes.appendChild(childEl);
+
+            // Draw Bezier from Branch to Child
+            drawBezierCurve(
+              branchX + 336, branchTop + 45,
+              childX, childTop + 35,
+              theme.stroke,
+              true
+            );
+
+            childTop += 95;
+          });
+        }
+
+        // Increment Y for next branch
+        const branchSpan = isCollapsed ? 120 : Math.max(120, (branch.children ? branch.children.length * 95 : 120) + 20);
+        branchY += branchSpan;
+      });
+
+      updateTransform();
+    }
+
+    // --- DRAW SMOOTH BEZIER CONNECTION CURVES ---
+    function drawBezierCurve(x1, y1, x2, y2, color = "#38bdf8", isSub = false) {
+      const dx = Math.abs(x2 - x1) * 0.55;
+      const cx1 = x1 + dx;
+      const cy1 = y1;
+      const cx2 = x2 - dx;
+      const cy2 = y2;
+
+      const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      path.setAttribute("d", `M ${x1} ${y1} C ${cx1} ${cy1}, ${cx2} ${cy2}, ${x2} ${y2}`);
+      path.setAttribute("fill", "none");
+      path.setAttribute("stroke", color);
+      path.setAttribute("stroke-width", isSub ? "1.5" : "2");
+      path.setAttribute("stroke-opacity", isSub ? "0.45" : "0.75");
+      path.setAttribute("stroke-linecap", "round");
+      if (isSub) {
+        path.setAttribute("stroke-dasharray", "4 2");
+      }
+      canvasSvg.appendChild(path);
+
+      // Connection Joint Dot at target
+      const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      circle.setAttribute("cx", x2);
+      circle.setAttribute("cy", y2);
+      circle.setAttribute("r", isSub ? "3" : "4");
+      circle.setAttribute("fill", color);
+      circle.setAttribute("opacity", "0.9");
+      canvasSvg.appendChild(circle);
+    }
+
+    // --- CANVAS PAN & ZOOM LOGIC ---
+    function updateTransform() {
+      canvasTransform.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+    }
+
+    canvasViewport.addEventListener("mousedown", (e) => {
+      if (e.target.closest(".glass-card") || e.target.closest("button")) return;
+      isDragging = true;
+      startX = e.clientX - panX;
+      startY = e.clientY - panY;
+    });
+
+    window.addEventListener("mousemove", (e) => {
+      if (!isDragging) return;
+      panX = e.clientX - startX;
+      panY = e.clientY - startY;
+      updateTransform();
+    });
+
+    window.addEventListener("mouseup", () => {
+      isDragging = false;
+    });
+
+    canvasViewport.addEventListener("wheel", (e) => {
+      e.preventDefault();
+      const zoomFactor = e.deltaY < 0 ? 1.08 : 0.92;
+      const newScale = Math.min(Math.max(scale * zoomFactor, 0.4), 1.8);
+
+      const rect = canvasViewport.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+
+      panX = mouseX - (mouseX - panX) * (newScale / scale);
+      panY = mouseY - (mouseY - panY) * (newScale / scale);
+      scale = newScale;
+
+      updateTransform();
+    }, { passive: false });
+
+    function zoomCanvas(delta) {
+      scale = Math.min(Math.max(scale + delta, 0.4), 1.8);
+      updateTransform();
+    }
+
+    function resetCanvasView() {
+      panX = 80;
+      panY = 60;
+      scale = 0.85;
+      updateTransform();
+    }
+
+    function toggleNodeCollapse(branchId) {
+      if (collapsedNodes.has(branchId)) {
+        collapsedNodes.delete(branchId);
+      } else {
+        collapsedNodes.add(branchId);
+      }
+      renderCanvasGraph();
+    }
+
+    function toggleExpandAllNodes() {
+      const btn = document.getElementById("btnExpandAll");
+      if (collapsedNodes.size === 0) {
+        laborModel.forEach(b => collapsedNodes.add(b.id));
+        btn.innerHTML = `<span>✨</span> Mở rộng tất cả`;
+      } else {
+        collapsedNodes.clear();
+        btn.innerHTML = `<span>✨</span> Thu gọn tất cả`;
+      }
+      renderCanvasGraph();
+    }
+
+    // --- BENTO GRID RENDERER ---
+    function renderBentoGrid() {
+      const container = document.getElementById("bentoGridContainer");
+      container.innerHTML = laborModel.map(branch => {
+        const theme = colorClasses[branch.accentColor] || colorClasses.cyan;
+        return `
+          <div class="glass-card glass-card-hover rounded-2xl p-5 border border-slate-800 flex flex-col justify-between space-y-4">
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2.5">
+                  <span class="text-2xl">${branch.icon}</span>
+                  <div>
+                    <h3 class="text-sm font-bold text-white">${branch.title}</h3>
+                    <span class="text-[10px] text-slate-400 font-mono">${branch.badge}</span>
+                  </div>
+                </div>
+                <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full ${theme.badge}">${branch.tag}</span>
+              </div>
+              <p class="text-xs text-slate-300 leading-relaxed mb-3">${branch.shortDesc}</p>
+              
+              <div class="space-y-2 pt-2 border-t border-slate-800/80">
+                ${branch.children.map(child => `
+                  <div 
+                    onclick="openDrawer({
+                      title: '${child.title.replace(/'/g, "\\'")}',
+                      icon: '${branch.icon}',
+                      tag: '${branch.title.replace(/'/g, "\\'")}',
+                      lawRef: '${child.lawRef.replace(/'/g, "\\'")}',
+                      content: \`${child.content.replace(/`/g, "\\`")}\`
+                    })" 
+                    class="p-2.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-800 cursor-pointer flex items-center justify-between transition-all group"
+                  >
+                    <div>
+                      <div class="text-xs font-semibold text-slate-200 group-hover:text-cyan-300">${child.title}</div>
+                      <div class="text-[10px] text-slate-500 truncate max-w-[200px]">${child.lawRef}</div>
+                    </div>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 whitespace-nowrap">
+                      ${child.kpi || 'Chi tiết →'}
+                    </span>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+            
+            <div class="pt-2 text-[11px] text-slate-400 flex items-center justify-between">
+              <span>${branch.children.length} Điều khoản trọng tâm</span>
+              <span class="text-cyan-400 font-medium">Bấm thẻ để xem chi tiết →</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // --- PENALTIES TABLE RENDERER ---
+    function renderPenaltiesTable() {
+      const container = document.getElementById("penaltiesTableContainer");
+      container.innerHTML = `
+        <div class="rounded-2xl border border-slate-800 overflow-hidden glass-card">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-900 text-slate-400 uppercase text-[10px] border-b border-slate-800">
+              <tr>
+                <th class="p-3.5">Hành vi vi phạm quy chuẩn lao động</th>
+                <th class="p-3.5 text-rose-400">Khung tiền phạt (Tổ chức)</th>
+                <th class="p-3.5">Căn cứ NĐ 12/2022/NĐ-CP</th>
+                <th class="p-3.5">Biện pháp khắc phục hậu quả</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800/80">
+              ${penaltiesData.map(p => `
+                <tr class="hover:bg-slate-900/50 transition-colors">
+                  <td class="p-3.5 font-medium text-slate-200 max-w-sm">
+                    ⚠️ ${p.behavior}
+                  </td>
+                  <td class="p-3.5 font-bold text-rose-400 whitespace-nowrap">
+                    ${p.fineOrg}
+                  </td>
+                  <td class="p-3.5 font-mono text-[11px] text-cyan-300 whitespace-nowrap">
+                    ${p.reference}
+                  </td>
+                  <td class="p-3.5 text-slate-400 text-[11px]">
+                    ${p.remedy}
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    // --- DRAWER ACTIONS ---
+    function openDrawer(item) {
+      currentDetail = item;
+      document.getElementById("drawerTitle").textContent = item.title;
+      document.getElementById("drawerIcon").textContent = item.icon || "📋";
+      document.getElementById("drawerBadge").textContent = item.tag || "CĂN CỨ PHÁP LÝ";
+      
+      const body = document.getElementById("drawerBody");
+      body.innerHTML = `
+        <div class="space-y-4">
+          <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between">
+            <span class="text-slate-400">Văn bản / Điều luật:</span>
+            <span class="font-mono text-cyan-300 font-semibold text-right">${item.lawRef}</span>
+          </div>
+          <div>
+            ${item.content}
+          </div>
+        </div>
+      `;
+
+      document.getElementById("detailDrawer").classList.remove("translate-x-full");
+      const backdrop = document.getElementById("drawerBackdrop");
+      backdrop.classList.remove("opacity-0", "pointer-events-none");
+      backdrop.classList.add("opacity-100");
+    }
+
+    function closeDrawer() {
+      document.getElementById("detailDrawer").classList.add("translate-x-full");
+      const backdrop = document.getElementById("drawerBackdrop");
+      backdrop.classList.remove("opacity-100");
+      backdrop.classList.add("opacity-0", "pointer-events-none");
+    }
+
+    function selectChildFromDrawer(childId) {
+      for (const branch of laborModel) {
+        for (const child of branch.children) {
+          if (child.id === childId) {
+            openDrawer({
+              title: child.title,
+              icon: branch.icon,
+              tag: branch.title,
+              lawRef: child.lawRef,
+              content: child.content
+            });
+            return;
+          }
+        }
+      }
+    }
+
+    function copyLegalReference() {
+      if (!currentDetail) return;
+      const textToCopy = `${currentDetail.title}\nCăn cứ: ${currentDetail.lawRef}`;
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        const btn = document.getElementById("btnCopyRef");
+        const oldHtml = btn.innerHTML;
+        btn.innerHTML = `<span>✓</span> Đã sao chép!`;
+        setTimeout(() => btn.innerHTML = oldHtml, 2000);
+      });
+    }
+
+    // --- MODE SWITCHER ---
+    function switchMode(mode) {
+      activeMode = mode;
+      
+      const vCanvas = document.getElementById("canvasViewport");
+      const vBento = document.getElementById("bentoViewport");
+      const vPenalties = document.getElementById("penaltiesViewport");
+      const controls = document.getElementById("canvasControls");
+
+      const bCanvas = document.getElementById("btnModeCanvas");
+      const bBento = document.getElementById("btnModeBento");
+      const bPenalties = document.getElementById("btnModePenalties");
+
+      // Reset tabs style
+      [bCanvas, bBento, bPenalties].forEach(b => {
+        b.className = "px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition-all flex items-center gap-1.5";
+      });
+
+      vCanvas.classList.add("hidden");
+      vBento.classList.add("hidden");
+      vPenalties.classList.add("hidden");
+      controls.classList.add("hidden");
+
+      if (mode === "canvas") {
+        vCanvas.classList.remove("hidden");
+        controls.classList.remove("hidden");
+        bCanvas.className = "px-2.5 py-1 rounded-lg text-white bg-slate-800 shadow-sm transition-all flex items-center gap-1.5";
+      } else if (mode === "bento") {
+        vBento.classList.remove("hidden");
+        bBento.className = "px-2.5 py-1 rounded-lg text-white bg-slate-800 shadow-sm transition-all flex items-center gap-1.5";
+        renderBentoGrid();
+      } else if (mode === "penalties") {
+        vPenalties.classList.remove("hidden");
+        bPenalties.className = "px-2.5 py-1 rounded-lg text-white bg-slate-800 shadow-sm transition-all flex items-center gap-1.5";
+        renderPenaltiesTable();
+      }
+    }
+
+    // --- GLOBAL SEARCH ---
+    function onSearchInput(query) {
+      const q = query.toLowerCase().trim();
+      if (!q) {
+        renderCanvasGraph();
+        return;
+      }
+
+      // If in canvas mode, highlight matched nodes
+      if (activeMode === "canvas") {
+        let firstMatch = null;
+        laborModel.forEach(branch => {
+          branch.children.forEach(child => {
+            const match = child.title.toLowerCase().includes(q) || 
+                          child.summary.toLowerCase().includes(q) || 
+                          child.lawRef.toLowerCase().includes(q);
+            const el = document.getElementById(`child-${child.id}`);
+            if (el) {
+              if (match) {
+                el.classList.add("ring-2", "ring-cyan-400", "scale-105");
+                if (!firstMatch) firstMatch = el;
+              } else {
+                el.classList.remove("ring-2", "ring-cyan-400", "scale-105");
+              }
+            }
+          });
+        });
+        if (firstMatch) {
+          const left = parseFloat(firstMatch.style.left) || 0;
+          const top = parseFloat(firstMatch.style.top) || 0;
+          panX = -left * scale + 400;
+          panY = -top * scale + 300;
+          updateTransform();
+        }
+      }
+    }
+
+    // --- KEYBOARD SHORTCUTS ---
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeDrawer();
+    });
+
+    // --- BOOTSTRAP ---
+    document.addEventListener("DOMContentLoaded", () => {
+      renderCanvasGraph();
+      resetCanvasView();
+    });
+  </script>
+</body>
+</html>
